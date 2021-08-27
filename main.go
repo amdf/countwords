@@ -36,6 +36,13 @@ func main() {
 		log.Fatalf("fail to load text from %s (%s)", defaultFileName, err.Error())
 	}
 
-	fmt.Print(buf.String())
-	fmt.Println("\n---\n\nsize ", buf.Len())
+	delimeters := []rune{' ', ',', '.', '!', '?', '"', ';', ':', '[', ']', '(', ')', '\n', '\r', '\t'}
+	words := Words{}
+	words.Load(&buf, delimeters)
+
+	uniq := words.GetUniq()
+	for k, v := range uniq {
+		fmt.Printf("%30s - %d\n", k, v)
+	}
+
 }
