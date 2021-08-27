@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"strings"
@@ -46,7 +45,6 @@ func main() {
 	words.Load(&buf, delimeters)
 
 	uniq := words.GetUniq()
-	for k, v := range uniq {
-		fmt.Printf("%30s - %d\n", k, v)
-	}
+
+	words.PrintUniq(uniq)
 }
