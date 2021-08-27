@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 
 	_ "modernc.org/sqlite"
 )
@@ -13,27 +15,19 @@ type wordCount struct {
 	Count int
 }
 
-//PrintUniq PrintUniq
-func (w Words) PrintUniq(uniq map[string]int) {
-	db, err := sql.Open("sqlite", ":memory:")
+//PrintUniq prints unique words and their count to file, using temp DB for sorting
+func (w Words) PrintUniq(f *os.File, uniq map[string]int) (err error) {
+	var db *sql.DB
+	db, err = w.getTemporaryDB()
 
 	if err != nil {
-		log.Fatalln("db fail")
-	} else {
-		log.Println("db ok")
+		err = errors.New("fail to init temp DB")
+		return
 	}
+	defer db.Close()
 
-	str := `CREATE TABLE words
-	(
-		word TEXT NOT NULL,
-		count INTEGER NOT NULL
-	)`
-	_, err = db.Exec(str)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	str = `INSERT INTO words (word, count) VALUES ($1, $2)`
+	//insert words
+	str := `INSERT INTO words (word, count) VALUES ($1, $2)`
 	for k, v := range uniq {
 		_, err = db.Exec(str, k, v)
 		if err != nil {
@@ -41,6 +35,7 @@ func (w Words) PrintUniq(uniq map[string]int) {
 		}
 	}
 
+	//sort by word count
 	var wrdc []wordCount
 
 	rows, dberr := db.Query(`SELECT word, count FROM words ORDER BY count ASC`)
@@ -54,9 +49,27 @@ func (w Words) PrintUniq(uniq map[string]int) {
 		rows.Close()
 	}
 
+	//print sorted
 	for _, elem := range wrdc {
 		fmt.Printf("%30s - %d\n", elem.Word, elem.Count)
 	}
 
-	db.Close()
+	return
+}
+
+func (w Words) getTemporaryDB() (db *sql.DB, err error) {
+	db, err = sql.Open("sqlite", ":memory:")
+
+	if err != nil {
+		return
+	}
+
+	str := `CREATE TABLE words
+	(
+		word TEXT NOT NULL,
+		count INTEGER NOT NULL
+	)`
+	_, err = db.Exec(str)
+
+	return
 }

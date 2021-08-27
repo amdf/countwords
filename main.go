@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 
 	"strings"
 )
@@ -46,5 +47,5 @@ func main() {
 
 	uniq := words.GetUniq()
 
-	words.PrintUniq(uniq)
+	words.PrintUniq(os.Stdout, uniq)
 }
