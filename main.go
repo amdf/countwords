@@ -6,16 +6,35 @@ import (
 	"os"
 
 	"strings"
+
+	"github.com/natefinch/lumberjack"
 )
 
 const defaultFileName = "./tmpfile.html"
 
-var fetch = flag.String("f", "", "url to fetch")
+var flagURL = flag.String("url", "", "(required) url to fetch")
+var flagLogfile = flag.String("log", "", "(optional) error log file name")
 
 func main() {
 	flag.Parse()
 
-	url := *fetch
+	logfilename := *flagLogfile
+	url := *flagURL
+
+	if "" == url {
+		flag.Usage()
+		return
+	}
+
+	if "" != logfilename {
+		log.SetOutput(&lumberjack.Logger{
+			Filename:   logfilename,
+			MaxSize:    1, // megabytes
+			MaxBackups: 3,
+			MaxAge:     7,     //days
+			Compress:   false, // disabled by default
+		})
+	}
 
 	page := Page{}
 
@@ -47,5 +66,8 @@ func main() {
 
 	uniq := words.GetUniq()
 
-	words.PrintUniq(os.Stdout, uniq)
+	err = words.PrintUniq(os.Stdout, uniq)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
