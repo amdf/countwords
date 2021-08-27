@@ -36,7 +36,12 @@ func main() {
 		log.Fatalf("fail to load text from %s (%s)", defaultFileName, err.Error())
 	}
 
-	delimeters := []rune{' ', ',', '.', '!', '?', '"', ';', ':', '[', ']', '(', ')', '\n', '\r', '\t'}
+	delimeters := []rune{
+		' ', ',', '.', '!', '?', '"', ';', ':',
+		'[', ']', '(', ')', '\n', '\r', '\t', '«',
+		'»', '—', '–', '“', '”', '…', '°', '²', '³',
+	}
+
 	words := Words{}
 	words.Load(&buf, delimeters)
 
@@ -44,5 +49,4 @@ func main() {
 	for k, v := range uniq {
 		fmt.Printf("%30s - %d\n", k, v)
 	}
-
 }
