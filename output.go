@@ -51,7 +51,7 @@ func (w Words) PrintUniq(f *os.File, uniq map[string]int) (err error) {
 
 	//print sorted
 	for _, elem := range wrdc {
-		fmt.Printf("%30s - %d\n", elem.Word, elem.Count)
+		fmt.Fprintf(f, "%30s - %d\n", elem.Word, elem.Count)
 	}
 
 	return

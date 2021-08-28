@@ -22,7 +22,7 @@ type Page struct {
 //Create page. Load HTML page content from URL and open it.
 func (p *Page) Create(filename string, url string) (err error) {
 	if nil == p {
-		err = errors.New("wrong param")
+		err = errors.New("wrong call")
 		return
 	}
 	client := http.Client{}
@@ -53,10 +53,26 @@ func (p *Page) Create(filename string, url string) (err error) {
 	return
 }
 
+//Load content
+func (p *Page) Load(r *bufio.Reader) (err error) {
+	if nil == p {
+		err = errors.New("wrong call")
+		return
+	}
+	if nil == r {
+		err = errors.New("wrong param")
+		return
+	}
+
+	p.rd = r
+
+	return
+}
+
 //Open page. Loads HTML page from file.
 func (p *Page) Open(filename string) (err error) {
 	if nil == p {
-		err = errors.New("wrong param")
+		err = errors.New("wrong call")
 		return
 	}
 
@@ -74,9 +90,11 @@ func (p *Page) Open(filename string) (err error) {
 
 	if 0 == fileinfo.Size() {
 		err = errors.New("no data")
+		rf.Close()
+		return
 	}
 
-	p.rd = bufio.NewReader(rf)
+	p.Load(bufio.NewReader(rf))
 	return
 }
 

@@ -16,7 +16,7 @@ type Words struct {
 //Load words separated by any from the list of delimeters
 func (w *Words) Load(rd io.Reader, delim []rune) (err error) {
 	if nil == w {
-		err = errors.New("wrong param")
+		err = errors.New("wrong call")
 		return
 	}
 
