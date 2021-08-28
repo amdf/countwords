@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 
-	"strings"
-
 	"github.com/natefinch/lumberjack"
 )
 
@@ -14,14 +12,16 @@ const defaultFileName = "./tmpfile.html"
 
 var flagURL = flag.String("url", "", "(required) url to fetch")
 var flagLogfile = flag.String("log", "", "(optional) error log file name")
+var flagFile = flag.String("file", "", "(optional) html file to open")
 
 func main() {
 	flag.Parse()
 
+	filename := *flagFile
 	logfilename := *flagLogfile
 	url := *flagURL
 
-	if "" == url {
+	if "" == url && "" == filename {
 		flag.Usage()
 		return
 	}
@@ -38,21 +38,24 @@ func main() {
 
 	page := Page{}
 
-	if strings.Contains(url, "http") {
-		err := page.Create(defaultFileName, url)
+	if "" != url {
+		filename = defaultFileName
+		err := page.Create(filename, url)
 		if err != nil {
-			log.Fatalf("cannot create %s from %s (%s)", defaultFileName, url, err.Error())
+			log.Fatalf("unable to create %s from %s (%s)", filename, url, err.Error())
 		}
 	} else {
-		err := page.Open(defaultFileName)
-		if err != nil {
-			log.Fatalf("cannot open %s (%s)", defaultFileName, err.Error())
+		if "" != filename {
+			err := page.Open(filename)
+			if err != nil {
+				log.Fatalf("unable to open %s (%s)", filename, err.Error())
+			}
 		}
 	}
 
 	buf, err := page.GetText()
 	if err != nil {
-		log.Fatalf("fail to load text from %s (%s)", defaultFileName, err.Error())
+		log.Fatalf("fail to load text (%s)", err.Error())
 	}
 
 	delimeters := []rune{
